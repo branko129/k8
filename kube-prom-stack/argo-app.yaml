@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prometheus
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  sources:
+
+  - repoURL: 'https://prometheus-community.github.io/helm-charts'
+    chart: kube-prometheus-stack
+    targetRevision: 69.2.0
+    helm:
+      valueFiles:
+      - $values/overlay/dev/kube-prometheus-stack/helm/kube-prometheus-stack-values.yaml
+  
+
+  - repoURL: 'https://gitlab.nortal.com/opaz/opaz-argocd-gitops.git'
+    targetRevision: HEAD
+    ref: values
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+
+  syncPolicy:
+    syncOptions:
+    - ServerSideApply=true
+    - CreateNamespace=true
+
+    automated:
+      selfHeal: true
+      prune: true
