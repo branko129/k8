@@ -1,13 +1,13 @@
-# apiVersion: v1
-# kind: Secret
-# metadata:
-#   name: argo-git
-#   namespace: argocd
-#   labels:
-#     argocd.argoproj.io/secret-type: repository
-# stringData:
-#   name: argo
-#   url: https://gitlab.nortal.com/opaz/opaz-argocd-gitops.git
-#   type: git
-#   username: project_2674_bot_b758f798f5c6
-#   password: glpat-rwdpgiNE5xsmhzeoVgDG
+apiVersion: v1
+kind: Secret
+metadata:
+  name: argo-git
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: repository
+stringData:
+  name: argo
+  url: https://LighthouseSoftwareBV@dev.azure.com/LighthouseSoftwareBV/QM%20NextGen/_git/QM%20NextGen%20GitOps
+  type: git
+  username: branko
+  password: C1gKshZWJlcdSIRST9DmiK9eiWJqILzLD4Otljfd0W2B1UuNw1YxJQQJ99BFACAAAAAFQGDaAAASAZDO4ZtH
