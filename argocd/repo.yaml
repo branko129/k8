@@ -1,0 +1,13 @@
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: argo-git
+#   namespace: argocd
+#   labels:
+#     argocd.argoproj.io/secret-type: repository
+# stringData:
+#   name: argo
+#   url: https://gitlab.nortal.com/opaz/opaz-argocd-gitops.git
+#   type: git
+#   username: project_2674_bot_b758f798f5c6
+#   password: glpat-rwdpgiNE5xsmhzeoVgDG
