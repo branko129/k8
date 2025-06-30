@@ -9,7 +9,7 @@ spec:
   elasticsearchRef:
     name: elastic-cluster
   config:
-    server.publicBaseUrl: "https://dev-kibana.opaz.me"
+    server.publicBaseUrl: "https://host.me"
     csp.strict: false
   podTemplate:
     spec:
