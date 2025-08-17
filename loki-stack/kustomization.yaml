@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- alloy.yaml
+- loki.yaml
+
+configMapGenerator:
+  - name: alloy
+    files:
+      - alloy-config.go
+  - name: loki-config
+    files:
+      - loki-config.yaml
+  - name: loki-rules
+    files:
+      - loki-rules-logs.yaml
+
+images:
+  - name: grafana/loki
+    newTag: 3.4.3
+  - name: docker.io/grafana/alloy
+    newTag: v1.8.1
+
+patches:
+- path: storage-patch.yaml

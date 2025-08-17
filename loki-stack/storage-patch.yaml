@@ -1,0 +1,14 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: loki
+spec:
+  volumeClaimTemplates:
+  - metadata:
+      name: loki-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: oci-bv-hsm-retain
+      resources:
+        requests:
+          storage: 50Gi

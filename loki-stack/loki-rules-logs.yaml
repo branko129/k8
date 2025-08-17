@@ -1,0 +1,12 @@
+groups:
+  - name: Log Alerts
+    rules:
+      - alert: KubePodHighLogErrorCount
+        expr: |
+          sum(count_over_time({job=~".+"} | label_format level=detected_level | level = "error" [10m])) by (instance,level) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          description: "{{ $value }} errors detected in logs for container {{ $labels.instance }}."
+          summary: High error count in pod logs.

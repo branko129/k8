@@ -1,0 +1,205 @@
+---
+# Source: loki-stack/charts/loki/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: loki
+  name: loki
+automountServiceAccountToken: true
+---
+# Source: loki-stack/templates/datasources.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: loki-datasource
+  labels:
+    grafana_datasource: "1"
+data:
+  loki-stack-datasource.yaml: |-
+    apiVersion: 1
+    datasources:
+    - name: Loki
+      type: loki
+      access: proxy
+      url: "http://loki:3100"
+      version: 1
+      isDefault: false
+      jsonData:
+        {}
+---
+# Source: loki-stack/charts/loki/templates/role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: loki
+  labels:
+    app: loki
+rules:
+- apiGroups:      ['extensions']
+  resources:      ['podsecuritypolicies']
+  verbs:          ['use']
+  resourceNames:  [loki]
+---
+# Source: loki-stack/charts/loki/templates/rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: loki
+  labels:
+    app: loki
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: loki
+subjects:
+- kind: ServiceAccount
+  name: loki
+---
+# Source: loki-stack/charts/loki/templates/service-headless.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: loki-headless
+  labels:
+    app: loki
+spec:
+  clusterIP: None
+  ports:
+    - port: 3100
+      protocol: TCP
+      name: http-metrics
+      targetPort: http-metrics
+  selector:
+    app: loki
+---
+# Source: loki-stack/charts/loki/templates/service-memberlist.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: loki-memberlist
+  labels:
+    app: loki
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - name: http
+      port: 7946
+      targetPort: memberlist-port
+      protocol: TCP
+  selector:
+    app: loki
+---
+# Source: loki-stack/charts/loki/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: loki
+  labels:
+    app: loki
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3100
+      protocol: TCP
+      name: http-metrics
+      targetPort: http-metrics
+  selector:
+    app: loki
+---
+# Source: loki-stack/charts/loki/templates/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: loki
+  labels:
+    app: loki
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: loki
+      release: loki
+  serviceName: loki-headless
+  template:
+    metadata:
+      labels:
+        app: loki
+        name: loki
+        release: loki
+    spec:
+      serviceAccountName: loki
+      securityContext:
+        fsGroup: 10001
+        runAsGroup: 10001
+        runAsNonRoot: true
+        runAsUser: 10001
+      containers:
+        - name: loki
+          image: grafana/loki
+          imagePullPolicy: IfNotPresent
+          args:
+            - "-config.file=/etc/loki/loki.yaml"
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: config
+              mountPath: /etc/loki/loki.yaml
+              subPath: loki-config.yaml
+              readOnly: true
+            - name: loki-storage
+              mountPath: "/data"
+            - name: loki-rules
+              mountPath: "/tmp/rules/fake"
+          ports:
+            - name: http-metrics
+              containerPort: 3100
+              protocol: TCP
+            - name: grpc
+              containerPort: 9095
+              protocol: TCP
+            - name: memberlist-port
+              containerPort: 7946
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: http-metrics
+            initialDelaySeconds: 45
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http-metrics
+            initialDelaySeconds: 45
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+          securityContext:
+            readOnlyRootFilesystem: true
+          env:
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: config
+          configMap:
+            name: loki-config
+        - name: loki-rules
+          configMap:
+            name: loki-rules
+        # - name: storage
+        #   emptyDir: {}
+  volumeClaimTemplates:
+  - apiVersion: v1	
+    kind: PersistentVolumeClaim
+    metadata:
+      name: loki-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      # storageClassName: 
+      resources:
+        requests:
+          storage: 1Gi
