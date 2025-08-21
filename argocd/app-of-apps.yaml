@@ -10,7 +10,7 @@ spec:
   project: default
 
   source:
-    repoURL: https://LighthouseSoftwareBV@dev.azure.com/LighthouseSoftwareBV/QM%20NextGen/_git/QM%20NextGen%20GitOps
+    repoURL: <repo-url>
     targetRevision: HEAD
     path: overlay/test/apps
   destination:

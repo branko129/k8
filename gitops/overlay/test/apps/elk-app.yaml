@@ -16,7 +16,7 @@ spec:
 
   - repoURL: https://github.com/branko129/k8
     targetRevision: HEAD
-    path: overlay/dev-oci/elk
+    path: gitops/overlay/dev-oci/elk
 
   destination:
     server: https://kubernetes.default.svc

@@ -15,10 +15,9 @@ spec:
     targetRevision: 69.2.0
     helm:
       valueFiles:
-      - $values/overlay/dev/kube-prometheus-stack/helm/kube-prometheus-stack-values.yaml
+      - $values/gitops/overlay/test/kube-prom-stack/kube-prom-stack-values.yaml
   
-
-  - repoURL: 'https://gitlab.nortal.com/opaz/opaz-argocd-gitops.git'
+  - repoURL: 'https://github.com/branko129/k8'
     targetRevision: HEAD
     ref: values
 
