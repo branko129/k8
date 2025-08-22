@@ -1,0 +1,50 @@
+## Ref: https://github.com/kubernetes/ingress-nginx/blob/main/charts/ingress-nginx/values.yaml
+
+## nginx configuration
+## Ref: https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/index.md
+##
+controller:
+  allowSnippetAnnotations: true
+  # -- Will add custom headers before sending response traffic to the client according to: https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#add-headers
+  addHeaders:
+    Content-Security-Policy: frame-ancestors 'self' http://localhost:3000
+    Referrer-Policy: same-origin
+    X-Content-Type-Options: nosniff
+    X-Frame-Options: SAMEORIGIN
+
+  # extraArgs:
+  #   default-ssl-certificate: "ingress-nginx/ingress-nginx-cert"
+
+  replicaCount: 1
+  # -- Minimum available pods set in PodDisruptionBudget.
+  # Define either 'minAvailable' or 'maxUnavailable', never both.
+  minAvailable: 1
+  # -- Maximum unavailable pods set in PodDisruptionBudget. If set, 'minAvailable' is ignored.
+  # maxUnavailable: 1
+  # extraArgs: 
+  #   default-ssl-certificate: "ingress-nginx/public-nginx-tls"
+
+  service:
+    annotations: {}
+    #   nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    #   service.beta.kubernetes.io/oci-load-balancer-shape: "100Mbps"
+      # service.beta.kubernetes.io/oci-load-balancer-shape-flex-min: "50"
+      # service.beta.kubernetes.io/oci-load-balancer-shape-flex-max: "100"
+      # acme.cert-manager.io/http01-edit-in-place: "true"
+      # service.beta.kubernetes.io/oci-load-balancer-subnet1: "ocid1.subnet.oc9.region.aaaaahejfrvjhgesrgvkjwerhxa7k2vkt3yccj7axb7sxk55tvnlek3sq"
+
+    # loadBalancerIP: "public-ipv4-address"
+  config:
+    annotations-risk-level: Critical
+  ## Define requests resources to avoid probe issues due to CPU utilization in busy nodes
+  ## ref: https://github.com/kubernetes/ingress-nginx/issues/4735#issuecomment-551204903
+  ## Ideally, there should be no limits.
+  ## https://engineering.indeedblog.com/blog/2019/12/cpu-throttling-regression-fix/
+  # resources:
+    ##  limits:
+    ##    cpu: 100m
+    ##    memory: 90Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 90Mi
+  
